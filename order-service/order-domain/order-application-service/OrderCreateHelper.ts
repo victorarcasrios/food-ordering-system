@@ -1,27 +1,28 @@
-import injectLogger from "../../../../common/common-domain/logs/injectLogger";
-import LoggerInjected from "../../../../common/common-domain/logs/LoggerInjected";
-import CreateOrderCommand from "../../../order-application/create/CreateOrderCommand";
-import CreateOrderResponse from "../../../order-application/create/CreateOrderResponse";
-import Order from "../../order-domain-core/entities/Order";
-import Restaurant from "../../order-domain-core/entities/Restaurant";
-import OrderDomainException from "../../order-domain-core/exceptions/OrderDomainException";
-import OrderDomainService from "../../order-domain-core/OrderDomainService";
-import OrderDataMapper from "../mappers/OrderDataMapper";
-import CustomersRepository from "./output/repositories/CustomersRepository";
-import OrdersRepository from "./output/repositories/OrdersRepository";
-import RestaurantsRepository from "./output/repositories/RestaurantsRepository";
+import injectLogger from "../../../common/common-domain/logs/injectLogger";
+import LoggerInjected from "../../../common/common-domain/logs/LoggerInjected";
+import CreateOrderCommand from "../../order-application/create/CreateOrderCommand";
+import Order from "../order-domain-core/entities/Order";
+import Restaurant from "../order-domain-core/entities/Restaurant";
+import OrderCreatedEvent from "../order-domain-core/events/OrderCreatedEvent";
+import OrderDomainException from "../order-domain-core/exceptions/OrderDomainException";
+import OrderDomainService from "../order-domain-core/OrderDomainService";
+import OrderDataMapper from "./mappers/OrderDataMapper";
+import CustomersRepository from "./ports/output/repositories/CustomersRepository";
+import OrdersRepository from "./ports/output/repositories/OrdersRepository";
+import RestaurantsRepository from "./ports/output/repositories/RestaurantsRepository";
 
 @injectLogger
-class OrderCreateCommandHandler {
+class OrderCreateHelper {
     constructor(
-        readonly orderDomainService: OrderDomainService,
-        readonly ordersRepository: OrdersRepository,
-        readonly customersRepository: CustomersRepository,
-        readonly restaurantsRepository: RestaurantsRepository,
-        readonly orderDataMapper: OrderDataMapper
+        private readonly orderDomainService: OrderDomainService,
+        private readonly ordersRepository: OrdersRepository,
+        private readonly customersRepository: CustomersRepository,
+        private readonly restaurantsRepository: RestaurantsRepository,
+        private readonly orderDataMapper: OrderDataMapper
     ) {}
 
-    createOrder(createOrderCommand: CreateOrderCommand): CreateOrderResponse {
+    // TODO: Transactional
+    persistOrder(createOrderCommand: CreateOrderCommand): OrderCreatedEvent {
         this.checkCustomer(createOrderCommand.customerId)
         const restaurant = this.checkRestaurant(createOrderCommand)
         const order = this.orderDataMapper.createOrderCommandToOrder(createOrderCommand)
@@ -29,8 +30,8 @@ class OrderCreateCommandHandler {
             order, restaurant
         )
         const orderResult = this.saveOrder(order)
-        this.logger.info(`Order is created with id: ${orderResult.id!.value}`)
-        return this.orderDataMapper.orderToCreateOrderResponse(orderResult)
+        this.logger.info(`Order is created with id: ${orderResult.id?.value}`)
+        return orderCreatedEvent
     }
 
     private saveOrder(order: Order): Order {
@@ -74,6 +75,6 @@ class OrderCreateCommandHandler {
     }
 }
 
-declare interface OrderCreateCommandHandler extends LoggerInjected {}
+declare interface OrderCreateHelper extends LoggerInjected { }
 
-export default OrderCreateCommandHandler
+export default OrderCreateHelper
