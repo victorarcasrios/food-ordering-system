@@ -1,15 +1,16 @@
-import injectLogger from "../../../../common/common-domain/logs/injectLogger";
-import LoggerInjected from "../../../../common/common-domain/logs/LoggerInjected";
-import CreateOrderCommand from "../../../order-application/create/CreateOrderCommand";
-import CreateOrderResponse from "../../../order-application/create/CreateOrderResponse";
-import Order from "../../order-domain-core/entities/Order";
-import Restaurant from "../../order-domain-core/entities/Restaurant";
-import OrderDomainException from "../../order-domain-core/exceptions/OrderDomainException";
-import OrderDomainService from "../../order-domain-core/OrderDomainService";
-import OrderDataMapper from "../mappers/OrderDataMapper";
-import CustomersRepository from "./output/repositories/CustomersRepository";
-import OrdersRepository from "./output/repositories/OrdersRepository";
-import RestaurantsRepository from "./output/repositories/RestaurantsRepository";
+import injectLogger from "../../../common/common-domain/logs/injectLogger";
+import LoggerInjected from "../../../common/common-domain/logs/LoggerInjected";
+import CreateOrderCommand from "../../order-application/create/CreateOrderCommand";
+import CreateOrderResponse from "../../order-application/create/CreateOrderResponse";
+import Order from "../order-domain-core/entities/Order";
+import Restaurant from "../order-domain-core/entities/Restaurant";
+import OrderDomainException from "../order-domain-core/exceptions/OrderDomainException";
+import OrderDomainService from "../order-domain-core/OrderDomainService";
+import ApplicationDomainEventPublisher from "./ApplicationDomainEventPublisher";
+import OrderDataMapper from "./mappers/OrderDataMapper";
+import CustomersRepository from "./ports/output/repositories/CustomersRepository";
+import OrdersRepository from "./ports/output/repositories/OrdersRepository";
+import RestaurantsRepository from "./ports/output/repositories/RestaurantsRepository";
 
 @injectLogger
 class OrderCreateCommandHandler {
@@ -18,7 +19,8 @@ class OrderCreateCommandHandler {
         readonly ordersRepository: OrdersRepository,
         readonly customersRepository: CustomersRepository,
         readonly restaurantsRepository: RestaurantsRepository,
-        readonly orderDataMapper: OrderDataMapper
+        readonly orderDataMapper: OrderDataMapper,
+        readonly applicationDomainEventPublisher: ApplicationDomainEventPublisher
     ) {}
 
     createOrder(createOrderCommand: CreateOrderCommand): CreateOrderResponse {
@@ -30,6 +32,7 @@ class OrderCreateCommandHandler {
         )
         const orderResult = this.saveOrder(order)
         this.logger.info(`Order is created with id: ${orderResult.id!.value}`)
+        this.applicationDomainEventPublisher.publish(orderCreatedEvent)
         return this.orderDataMapper.orderToCreateOrderResponse(orderResult)
     }
 
