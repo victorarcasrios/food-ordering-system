@@ -5,6 +5,6 @@ export default class TrackOrderResponse {
     constructor(
         readonly trackingOrderId: Uid,
         readonly orderStatus: OrderStatus,
-        readonly failureMessages: string[]
+        readonly failureMessages: string[] = []
     ) { }
 }

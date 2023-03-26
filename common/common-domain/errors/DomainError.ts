@@ -1,4 +1,4 @@
-export default class DomainException extends Error {
+export default class DomainError extends Error {
     constructor(
         message: string,
         name: string = new.target.name

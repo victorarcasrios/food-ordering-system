@@ -5,7 +5,7 @@ import Money from "../../../../common/common-domain/value-objects/Money";
 import OrderId from "../../../../common/common-domain/value-objects/OrderId";
 import OrderStatus from "../../../../common/common-domain/value-objects/OrderStatus";
 import RestaurantId from "../../../../common/common-domain/value-objects/RestaurantId";
-import OrderDomainException from "../exceptions/OrderDomainException";
+import OrderDomainError from "../errors/OrderDomainError";
 import OrderItemId from "../value-objects/OrderItemId";
 import StreetAddress from "../value-objects/StreetAddress";
 import TrackingId from "../value-objects/TrackingId";
@@ -65,7 +65,7 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
 
     pay() {
         if (this.orderStatus !== OrderStatus.Pending) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 "Order is not in the correct state for pay operation!"
             )
         }
@@ -75,7 +75,7 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
 
     approve() {
         if (this.orderStatus !== OrderStatus.Paid) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 "Order is not in the correct state for approve operation!"
             )
         }
@@ -85,7 +85,7 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
 
     initCancelling(failureMessages: string[]) {
         if (this.orderStatus !== OrderStatus.Paid) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 "Order is not in the correct state for init cancelling operation!"
             )
         }
@@ -95,8 +95,9 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
     }
 
     cancel(failureMessages: string[]) {
-        if (![OrderStatus.Pending, OrderStatus.Cancelling].includes(this.orderStatus ?? -1)) {
-            throw new OrderDomainException(
+        if (this.orderStatus !== OrderStatus.Pending
+            && this.orderStatus !== OrderStatus.Cancelling) {
+            throw new OrderDomainError(
                 "Order is not in the correct state for cancel operation!"
             )
         }
@@ -107,7 +108,7 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
 
     private validateInitialOrder() {
         if (this.orderStatus || this.id) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 "Order is not in correct state for initialization!"
             )
         }
@@ -115,7 +116,7 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
 
     private validateTotalPrice() {
         if (!this.price || !this.price.isGreaterThanZero()) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 "Order price must be greater than zero!"
             )
         }
@@ -132,7 +133,7 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
         )
 
         if (!this.price.equals(orderItemsTotal)) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 `Total price ${this.price} is not equal to `
                 + `order items total: ${orderItemsTotal}!`
             )
@@ -141,7 +142,7 @@ export default class Order extends AggregateRoot<OrderId | undefined> {
 
     private validateItemPrice(item: OrderItem) {
         if (!item.isPriceValid()) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 `Order item price: ${item.price.amount} is not `
                 + `valid for product: ${item.product.id.value}!`
             )

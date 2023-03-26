@@ -25,6 +25,8 @@ export default class OrderItem extends BaseEntity<OrderItemId | undefined> {
     }
 
     isPriceValid(): boolean {
-        throw new Error("Method not implemented.");
+        return this.price.isGreaterThanZero()
+            && this.price.equals(this.product.price!)
+            && this.price.multiply(this.quantity).equals(this.subTotal)
     }
 }

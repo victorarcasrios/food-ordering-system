@@ -4,7 +4,7 @@ import CreateOrderCommand from "../../order-application/create/CreateOrderComman
 import Order from "../order-domain-core/entities/Order";
 import Restaurant from "../order-domain-core/entities/Restaurant";
 import OrderCreatedEvent from "../order-domain-core/events/OrderCreatedEvent";
-import OrderDomainException from "../order-domain-core/exceptions/OrderDomainException";
+import OrderDomainError from "../order-domain-core/errors/OrderDomainError";
 import OrderDomainService from "../order-domain-core/OrderDomainService";
 import OrderDataMapper from "./mappers/OrderDataMapper";
 import CustomersRepository from "./ports/output/repositories/CustomersRepository";
@@ -35,11 +35,11 @@ class OrderCreateHelper {
     }
 
     private saveOrder(order: Order): Order {
-        const orderResult = this.saveOrder(order)
+        const orderResult = this.ordersRepository.save(order)
         if (!orderResult) {
             const errorMessage = "Could not save order!"
             this.logger.error(errorMessage)
-            throw new OrderDomainException(errorMessage)
+            throw new OrderDomainError(errorMessage)
         }
 
         this.logger.info(`Order is saved with id: ${order.id!.value}`)
@@ -52,7 +52,7 @@ class OrderCreateHelper {
         if (!customer) {
             const errorMessage = `Could not find customer with id: ${customerId}`
             this.logger.warn(errorMessage)
-            throw new OrderDomainException(errorMessage)
+            throw new OrderDomainError(errorMessage)
         }
     }
 
@@ -68,7 +68,7 @@ class OrderCreateHelper {
         if (!maybeRestaurant) {
             const errorMessage = `Could not find restaurant with id ${createOrderCommand.restaurantId}`
             this.logger.warn(errorMessage)
-            throw new OrderDomainException(errorMessage)
+            throw new OrderDomainError(errorMessage)
         }
 
         return maybeRestaurant

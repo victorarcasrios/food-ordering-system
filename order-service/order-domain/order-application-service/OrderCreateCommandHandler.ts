@@ -22,7 +22,10 @@ class OrderCreateCommandHandler {
             `Order is created with id: ${orderCreatedEvent.order.id?.value}`
         )
         this.orderCreatedPaymentRequestMessagePublisher.publish(orderCreatedEvent)
-        return this.orderDataMapper.orderToCreateOrderResponse(orderCreatedEvent.order)
+        return this.orderDataMapper.orderToCreateOrderResponse(
+            orderCreatedEvent.order,
+            "Order created successfully"
+        )
     }
 }
 

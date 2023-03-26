@@ -1,5 +1,6 @@
-import { paramSchema } from "ts-decorator-validation";
-import CreateOrderCommand, { createOrderCommandSchema } from "../../order-application/create/CreateOrderCommand";
+// import { paramSchema } from "ts-decorator-validation";
+// import CreateOrderCommand, { createOrderCommandSchema } from "../../order-application/create/CreateOrderCommand";
+import CreateOrderCommand from "../../order-application/create/CreateOrderCommand";
 import CreateOrderResponse from "../../order-application/create/CreateOrderResponse";
 import TrackOrderQuery, { trackOrderQuerySchema } from "../../order-application/track/TrackOrderQuery";
 import TrackOrderResponse from "../../order-application/track/TrackOrderResponse";
@@ -16,17 +17,16 @@ export default class OrderApplicationServiceImplementation
     ) { }
 
     createOrder(
-        @paramSchema(createOrderCommandSchema)
+        // @paramSchema(createOrderCommandSchema)
         createOrderCommand: CreateOrderCommand
-        ): CreateOrderResponse {
-            return this.orderCreateCommandHandler.createOrder(createOrderCommand)
+    ): CreateOrderResponse {
+        return this.orderCreateCommandHandler.createOrder(createOrderCommand)
     }
 
     trackOrder(
-        @paramSchema(trackOrderQuerySchema)
+        // @paramSchema(trackOrderQuerySchema)
         trackOrderQuery: TrackOrderQuery
         ): TrackOrderResponse {
             return this.orderTrackCommandHandler.trackOrder(trackOrderQuery)
     }
-
 }

@@ -7,6 +7,7 @@ import CreateOrderCommand from "../../../order-application/create/CreateOrderCom
 import CreateOrderResponse from "../../../order-application/create/CreateOrderResponse";
 import OrderAddress from "../../../order-application/create/OrderAddress";
 import OrderItemDto from "../../../order-application/create/OrderItem";
+import TrackOrderResponse from "../../../order-application/track/TrackOrderResponse";
 import Order from "../../order-domain-core/entities/Order";
 import OrderItem from "../../order-domain-core/entities/OrderItem";
 import Product from "../../order-domain-core/entities/Product";
@@ -33,10 +34,19 @@ export default class OrderDataMapper {
         )
     }
 
-    orderToCreateOrderResponse(order: Order): CreateOrderResponse {
+    orderToCreateOrderResponse(order: Order, message: string): CreateOrderResponse {
         return new CreateOrderResponse(
             order.trackingId!.value,
-            order.orderStatus!
+            order.orderStatus!,
+            message
+        )
+    }
+
+    orderToTrackOrderResponse(order: Order): TrackOrderResponse {
+        return new TrackOrderResponse(
+            order.trackingId!.value,
+            order.orderStatus!,
+            order.failureMessages
         )
     }
 

@@ -5,7 +5,7 @@ import Restaurant from "./entities/Restaurant";
 import OrderCancelledEvent from "./events/OrderCancelledEvent";
 import OrderCreatedEvent from "./events/OrderCreatedEvent";
 import OrderPaidEvent from "./events/OrderPaidEvent";
-import OrderDomainException from "./exceptions/OrderDomainException";
+import OrderDomainError from "./errors/OrderDomainError";
 import OrderDomainService from "./OrderDomainService";
 
 @injectLogger
@@ -46,7 +46,7 @@ class OrderDomainServiceImplementation implements OrderDomainService {
         for (const item of order.items) {
             for (const restaurantProduct of restaurant.products) {
                 const { product: currentProduct } = item
-                if (currentProduct.name === restaurantProduct.name)
+                if (currentProduct.id.value === restaurantProduct.id.value)
                     currentProduct.updateWithConfirmedNameAndPrice(
                         restaurantProduct.name!, 
                         restaurantProduct.price!
@@ -57,7 +57,7 @@ class OrderDomainServiceImplementation implements OrderDomainService {
 
     private validateRestaurant(restaurant: Restaurant) {
         if (!restaurant.active) {
-            throw new OrderDomainException(
+            throw new OrderDomainError(
                 `Restaurant with id: ${restaurant.id.value} is currently not active!`
             )
         }
